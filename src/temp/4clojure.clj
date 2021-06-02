@@ -237,3 +237,81 @@
      (if (= current 0)
        result
        (recur (dec current) (* result current))))) 8)
+
+;43 (= (__ (range 10) 5) '((0 5) (1 6) (2 7) (3 8) (4 9))) (= (__ [1 2 3 4 5 6] 2) '((1 3 5) (2 4 6)))
+
+((fn [sq n]
+   (loop [[fst & rst :as all] sq current 1 result []]
+     (if (empty? all)
+       result
+       (if (< current (+ 1 n))
+         (recur rst (inc current) (conj result [fst]))
+         (if (not= 0 (mod current n))
+           (recur rst (inc current) (conj (nth result (dec (mod current n)))))
+           (recur rst 1 (conj (nth result (dec n)))))))))(range 10) 5)
+
+((fn [sq n]
+   (loop [[fst & rst :as all] sq current 1 result []]
+     (if (empty? all)
+       result
+       (if (nth result current)
+         (if (= current n)
+           (recur rst 1 (conj (nth result current) fst))
+           (recur rst (inc current) (conj (nth result current) fst)))
+         (recur rst (inc current) (conj (nth result current) fst)))
+         (recur rst (inc current) (conj result [fst]))
+         ))))
+
+((fn [sq n]
+   (loop [[fst & rst :as all] sq current 0 result []]
+     (clojure.pprint/pprint result)
+     (if (empty? all)
+       result
+       (if (= current (dec n))
+         (if (nth result current false)
+           (recur rst 0 (conj (nth result current) fst))
+           (recur rst 0 (conj result [fst])))
+         (if (nth result current false)
+           (recur rst (inc current) (conj (nth result current) fst))
+           (recur rst (inc current) (conj result [fst])))
+         ))
+     ))(range 10) 3)
+
+((fn [sq n]
+   (loop [[fst & rst :as all] sq current 0 result []]
+     (clojure.pprint/pprint result)
+     (if (> n current)
+       (recur rst (inc current) (conj result [fst]))
+       (recur rst 0 (conj (nth result current) fst)))))(range 10) 3)
+
+((fn [sq n]
+   (loop [[fst & rst :as all] sq current 0 result []]
+     (clojure.pprint/pprint result)
+     (if (empty? all)
+       result
+       (if (> n current)
+         (if (nth result current false)
+           (recur rst (inc current) (dosync (alter (nth result current) conj fst)))
+           (recur rst (inc current) (dosync (alter result conj fst))))
+           (if (nth result current false)
+             (recur rst 0 (dosync (alter (nth result current) conj fst)))
+             (recur rst 0 (dosync (alter result conj fst))))))))(range 10) 3)
+
+((fn [sq n]
+   (apply map vector (partition n sq)))(range 10) 3)
+
+; 44 (= (__ 2 [1 2 3 4 5]) '(3 4 5 1 2))
+
+((fn [n sq]
+   (if (> n (count sq))
+         (concat (drop (- n (count sq)) sq) (take (- n (count sq)) sq))
+         (if (< n 0)
+           (concat (drop (+ n (count sq)) sq) (take (+ n (count sq)) sq))
+           (concat (drop n sq) (take n sq))))) -4 '(:a :b :c))
+
+((fn [n sq]
+     (loop [num n input sq]
+       (if (and (> num 0) (<= num (count input)))
+        (concat (drop num input) (take num input))
+        (if (< num 0)(recur (+ num (count input)) input)
+        (if (> num (count input)) (recur (- num (count input)) input))))))  -4 '(:a :b :c))
